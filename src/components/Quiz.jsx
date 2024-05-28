@@ -4,13 +4,15 @@ import Question from "./Question";
 
 export default function Quiz() {
     const [quizQuestions, setQuizQuestions] = useState([])
-    const [isSubmit, setIsSubmit] = useState(false)
     const [score, setScore] = useState(0)
+    const [isLoading, setIsLoading] = useState(false)
+    const [isCheckedAnswers, setIsCheckedAnswers] = useState(false)
 
     useEffect(() => {
         const fetchQuestions = async () => {
             const res = await fetch("https://opentdb.com/api.php?amount=5&category=21&difficulty=medium&type=multiple")
             const data = await res.json()
+
             setQuizQuestions(data.results.map(result => ({
                 question: result.question,
                 correctAnswer: result.correct_answer,
@@ -18,6 +20,8 @@ export default function Quiz() {
                 id: uuidv4(),
                 chosenAnswer: "none",
             })))
+            setScore(0)
+            setIsLoading(false)
         }
         fetchQuestions()
     }, [])
@@ -29,11 +33,13 @@ export default function Quiz() {
     }
 
     const handleAnswerChange = (id, answer) => {
-        setQuizQuestions(prevQuestion => {
-            return prevQuestion.map(question =>
-                question.id === id ? { ...question, chosenAnswer: answer } : question
-            )
-        })
+        if (!isCheckedAnswers) {
+            setQuizQuestions(prevQuestion => {
+                return prevQuestion.map(question =>
+                    question.id === id ? { ...question, chosenAnswer: answer } : question
+                )
+            })
+        }
     }
 
     const handleSubmit = (e) => {
@@ -45,23 +51,26 @@ export default function Quiz() {
             }
         })
         setScore(newScore)
-        setIsSubmit(prev => !prev)
+        setIsCheckedAnswers(prev => !prev)
+    }
+
+    const handlePlayAgain = () => {
+        setIsCheckedAnswers(prev => !prev)
     }
 
     const questionsComponents = quizQuestions.map(question => {
         return <Question question={question} key={question.id} handleAnswerChange={handleAnswerChange} />
     })
 
-    console.log(quizQuestions);
-
     return (
         <div>
             <h1>Quiz</h1>
-            <form onSubmit={handleSubmit}>
+            <form>
                 {questionsComponents}
-                {isSubmit && <p>You scored {score}/5 correct answers</p>}
-                {isSubmit ? <button>Play again</button> : <button>Submit</button>}
             </form>
+            {isCheckedAnswers && <p>You scored {score}/5 correct answers</p>}
+            <button onClick={handleSubmit}>Check answers</button>
+            <button onClick={handlePlayAgain}>Play again</button>
         </div>
     )
 }

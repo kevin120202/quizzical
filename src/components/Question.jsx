@@ -16,7 +16,7 @@ export default function Question(props) {
                         checked={props.question.chosenAnswer === answer}
                         onChange={() => props.handleAnswerChange(props.question.id, answer)}
                     />
-                    <label htmlFor={`${props.question.id}-${index}`}>{answer}</label>
+                    <label htmlFor={`${props.question.id}-${index}`}>{decode(answer, { level: "html5" })}</label>
                 </div>
             ))}
         </div>
