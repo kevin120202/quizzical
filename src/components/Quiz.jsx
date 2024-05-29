@@ -3,28 +3,25 @@ import { v4 as uuidv4 } from 'uuid';
 import Question from "./Question";
 
 export default function Quiz() {
-    const [quizQuestions, setQuizQuestions] = useState([])
+    const [quizQuestionsData, setQuizQuestionsData] = useState([])
     const [score, setScore] = useState(0)
-    const [isLoading, setIsLoading] = useState(false)
     const [isCheckedAnswers, setIsCheckedAnswers] = useState(false)
 
     useEffect(() => {
-        const fetchQuestions = async () => {
-            const res = await fetch("https://opentdb.com/api.php?amount=5&category=21&difficulty=medium&type=multiple")
-            const data = await res.json()
-
-            setQuizQuestions(data.results.map(result => ({
-                question: result.question,
-                correctAnswer: result.correct_answer,
-                randomAnswers: getRandomAnswersArray([...result.incorrect_answers], result.correct_answer),
-                id: uuidv4(),
-                chosenAnswer: "none",
-            })))
-            setScore(0)
-            setIsLoading(false)
-        }
         fetchQuestions()
     }, [])
+
+    const fetchQuestions = async () => {
+        const res = await fetch("https://opentdb.com/api.php?amount=5&category=21&difficulty=medium&type=multiple")
+        const data = await res.json()
+        setQuizQuestionsData(data.results.map(result => ({
+            question: result.question,
+            correctAnswer: result.correct_answer,
+            randomAnswers: getRandomAnswersArray([...result.incorrect_answers], result.correct_answer),
+            id: uuidv4(),
+            chosenAnswer: "none",
+        })))
+    }
 
     const getRandomAnswersArray = (array, item) => {
         const randomIndex = Math.floor(Math.random() * (array.length + 1))
@@ -32,45 +29,46 @@ export default function Quiz() {
         return array
     }
 
+    console.log(quizQuestionsData);
+
     const handleAnswerChange = (id, answer) => {
-        if (!isCheckedAnswers) {
-            setQuizQuestions(prevQuestion => {
-                return prevQuestion.map(question =>
-                    question.id === id ? { ...question, chosenAnswer: answer } : question
-                )
-            })
-        }
+        setQuizQuestionsData(prevQuestion => {
+            return prevQuestion.map(question =>
+                question.id === id ? { ...question, chosenAnswer: answer } : question
+            )
+        })
     }
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        let newScore = 0
-        quizQuestions.forEach(question => {
+        setIsCheckedAnswers(prev => !prev)
+        let score = 0
+        quizQuestionsData.map(question => {
             if (question.correctAnswer === question.chosenAnswer) {
-                newScore += 1
+                score++
             }
         })
-        setScore(newScore)
-        setIsCheckedAnswers(prev => !prev)
+        setScore(score)
     }
 
     const handlePlayAgain = () => {
-        setIsCheckedAnswers(prev => !prev)
+        fetchQuestions();
+        setIsCheckedAnswers(false)
+        setScore(0);
     }
 
-    const questionsComponents = quizQuestions.map(question => {
-        return <Question question={question} key={question.id} handleAnswerChange={handleAnswerChange} />
+    const questionsComponents = quizQuestionsData.map(question => {
+        return <Question question={question} key={question.id} handleAnswerChange={handleAnswerChange} isCheckedAnswers={isCheckedAnswers} />
     })
 
     return (
         <div>
-            <h1>Quiz</h1>
-            <form>
+            <form onSubmit={handleSubmit}>
                 {questionsComponents}
+                {isCheckedAnswers && <p className="score-text">You scored {score}/5 answers</p>}
+                {!isCheckedAnswers ? <button className="check-answers-btn" disabled={isCheckedAnswers}>Check Answers</button>
+                    : <button type="button" onClick={handlePlayAgain}>Play again</button>}
             </form>
-            {isCheckedAnswers && <p>You scored {score}/5 correct answers</p>}
-            <button onClick={handleSubmit}>Check answers</button>
-            <button onClick={handlePlayAgain}>Play again</button>
         </div>
     )
 }

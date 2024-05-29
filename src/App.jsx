@@ -3,7 +3,7 @@ import './App.css'
 import Quiz from './components/Quiz'
 
 function App() {
-    const [StartQuiz, setStartQuiz] = useState(false)
+    const [startQuiz, setStartQuiz] = useState(false)
 
     function handleStartQuizBtn() {
         setStartQuiz(prev => !prev)
@@ -11,10 +11,11 @@ function App() {
 
     return (
         <main>
-            {StartQuiz ? <Quiz /> :
-                <div>
+            {startQuiz ? <Quiz /> :
+                <div className='first-page-content'>
                     <h1>Quizzical</h1>
-                    <button onClick={handleStartQuizBtn}>Start Quiz</button>
+                    <h2>Test your general knowledge here</h2>
+                    <button onClick={handleStartQuizBtn} className='start-quiz-btn'>Start Quiz</button>
                 </div>
             }
         </main>
