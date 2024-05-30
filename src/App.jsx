@@ -2,21 +2,28 @@ import { useState } from 'react'
 import './App.css'
 import Quiz from './components/Quiz'
 
-function App() {
-    const [startQuiz, setStartQuiz] = useState(false)
+function StartQuiz(props) {
+    return (
+        <div>
+            <h1>Quizzical</h1>
+            <p>How many can you get right?</p>
+            <button onClick={props.handleShouldShowGame} className='btn'>Start Quiz</button>
+        </div>
+    )
+}
 
-    function handleStartQuizBtn() {
-        setStartQuiz(prev => !prev)
+function App() {
+    const [shouldShowGame, setShouldShowGame] = useState(false)
+
+    function handleShouldShowGame() {
+        setShouldShowGame(true)
     }
 
     return (
         <main>
-            {startQuiz ? <Quiz /> :
-                <div className='first-page-content'>
-                    <h1>Quizzical</h1>
-                    <h2>Test your general knowledge here</h2>
-                    <button onClick={handleStartQuizBtn} className='start-quiz-btn'>Start Quiz</button>
-                </div>
+            {shouldShowGame
+                ? <Quiz />
+                : <StartQuiz handleShouldShowGame={handleShouldShowGame} />
             }
         </main>
     )
