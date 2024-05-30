@@ -4,10 +4,10 @@ import Quiz from './components/Quiz'
 
 function StartQuiz(props) {
     return (
-        <div>
+        <div className='start-quiz-container'>
             <h1>Quizzical</h1>
             <p>How many can you get right?</p>
-            <button onClick={props.handleShouldShowGame} className='btn'>Start Quiz</button>
+            <button onClick={props.handleShouldShowGame} className='start-quiz-btn'>Start Quiz</button>
         </div>
     )
 }
